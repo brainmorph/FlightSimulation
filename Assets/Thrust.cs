@@ -135,7 +135,7 @@ public class Thrust : MonoBehaviour
 
 
 
-
+    float previousMeasured = 0f;
     private float rollCommandFromPID(float desired)
     {
 
@@ -163,6 +163,12 @@ public class Thrust : MonoBehaviour
         Debug.Log("measured = " + measured);
         Debug.Log("rollError = " + rollError);
 
+
+        // at this point I need to also calculate derivative term
+        float deltaMeasured = previousMeasured - measured; // if the angle between previous and current is changing fast then we need to slow down
+        previousMeasured = measured;
+        float Kd = -100f;
+        rollError -= Kd * deltaMeasured;
 
 
 
