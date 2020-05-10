@@ -139,8 +139,8 @@ public class Thrust : MonoBehaviour
     private float rollCommandFromPID(float desired)
     {
 
-        float kp = 0.0f;
-        float kd = 0.0f;
+        float kp = 0.1f;
+        float kd = -3f;
 
         // calculate roll error
         Vector3 destinationVector = new Vector3(0, 1, 0);
@@ -158,6 +158,7 @@ public class Thrust : MonoBehaviour
         measured = measured * -1f; // necessary?
 
         float rollError = desired - measured;
+        rollError *= kp;
 
         Debug.Log("desired = " + desired);
         Debug.Log("measured = " + measured);
@@ -167,22 +168,17 @@ public class Thrust : MonoBehaviour
         // at this point I need to also calculate derivative term
         float deltaMeasured = previousMeasuredRoll - measured; // if the angle between previous and current is changing fast then we need to slow down
         previousMeasuredRoll = measured;
-        float Kd = -30f;
-        rollError -= Kd * deltaMeasured;
+        rollError -= kd * deltaMeasured;
 
-
-
-        float returnConstant = 1000f;
-        //return rollError * returnConstant;
-        return rollError/returnConstant;
+        return rollError;
     }
 
     float previousMeasuredPitch = 0f;
     private float pitchCommandFromPID(float desired)
     {
 
-        float kp = 0.0f;
-        float kd = 0.0f;
+        float kp = 0.1f;
+        float kd = -3f;
 
         // calculate roll error
         Vector3 destinationVector = new Vector3(0, 1, 0);
@@ -200,6 +196,7 @@ public class Thrust : MonoBehaviour
         measured = measured * -1f; // necessary?
 
         float pitchError = desired - measured;
+        pitchError *= kp;
 
         Debug.Log("desired = " + desired);
         Debug.Log("measured = " + measured);
@@ -209,14 +206,9 @@ public class Thrust : MonoBehaviour
         // at this point I need to also calculate derivative term
         float deltaMeasured = previousMeasuredPitch - measured; // if the angle between previous and current is changing fast then we need to slow down
         previousMeasuredPitch = measured;
-        float Kd = -30f;
-        pitchError -= Kd * deltaMeasured;
+        pitchError -= kd * deltaMeasured;
 
-
-
-        float returnConstant = 1000f;
-        //return rollError * returnConstant;
-        return pitchError / returnConstant;
+        return pitchError;
     }
 
     private float angleBetweenVectors(Vector3 destination, Vector3 initial)
