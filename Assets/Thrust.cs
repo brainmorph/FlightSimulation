@@ -33,7 +33,7 @@ public class Thrust : MonoBehaviour
     {
         //thrust = Input.GetAxis("Vertical");
         //roll = Input.GetAxis("Horizontal");
-        pitchCommand = -1 * Input.GetAxis("alternativeYAxis"); // right hand stick Y
+        desiredPitch += -1 * Input.GetAxis("alternativeYAxis"); // right hand stick Y
         desiredRoll += -1 * Input.GetAxis("alternativeXAxis"); // right hand stick X
         yawCommand = Input.GetAxis("Horizontal"); // left hand stick X
         thrustCommand = Input.GetAxis("Vertical"); // left hand stick Y
@@ -70,12 +70,12 @@ public class Thrust : MonoBehaviour
 
         //Debug.Log("thrust command = " + thrustCommand);
         Debug.Log("roll command = " + rollCommand);
-        //Debug.Log("pitch command = " + pitchCommand);
+        Debug.Log("pitch command = " + pitchCommand);
         //Debug.Log("yaw command = " + yawCommand);
 
         
         rollCommand = rollCommandFromPID(desiredRoll);
-        //pitchCommand += calculateAdditionalPitchFromPID();
+        pitchCommand = pitchCommandFromPID(desiredPitch);
 
         // react based on roll command
         if (rollCommand > 0)
@@ -135,7 +135,7 @@ public class Thrust : MonoBehaviour
 
 
 
-    float previousMeasured = 0f;
+    float previousMeasuredRoll = 0f;
     private float rollCommandFromPID(float desired)
     {
 
@@ -165,9 +165,9 @@ public class Thrust : MonoBehaviour
 
 
         // at this point I need to also calculate derivative term
-        float deltaMeasured = previousMeasured - measured; // if the angle between previous and current is changing fast then we need to slow down
-        previousMeasured = measured;
-        float Kd = -100f;
+        float deltaMeasured = previousMeasuredRoll - measured; // if the angle between previous and current is changing fast then we need to slow down
+        previousMeasuredRoll = measured;
+        float Kd = -30f;
         rollError -= Kd * deltaMeasured;
 
 
@@ -175,6 +175,48 @@ public class Thrust : MonoBehaviour
         float returnConstant = 1000f;
         //return rollError * returnConstant;
         return rollError/returnConstant;
+    }
+
+    float previousMeasuredPitch = 0f;
+    private float pitchCommandFromPID(float desired)
+    {
+
+        float kp = 0.0f;
+        float kd = 0.0f;
+
+        // calculate roll error
+        Vector3 destinationVector = new Vector3(0, 1, 0);
+
+        //float rollError = angleBetweenVectors(destinationVector, this.transform.up);
+        float measured = rb.transform.rotation.eulerAngles.z;
+
+        //TODO: I need to map the measured value to a different distribution of numbers...  the values need to be offest because the 0 point is really iffy
+        if (measured > 180)
+            measured = measured - 360;
+
+        if (measured > 360)
+            measured = 0;
+
+        measured = measured * -1f; // necessary?
+
+        float pitchError = desired - measured;
+
+        Debug.Log("desired = " + desired);
+        Debug.Log("measured = " + measured);
+        Debug.Log("pitchError = " + pitchError);
+
+
+        // at this point I need to also calculate derivative term
+        float deltaMeasured = previousMeasuredPitch - measured; // if the angle between previous and current is changing fast then we need to slow down
+        previousMeasuredPitch = measured;
+        float Kd = -30f;
+        pitchError -= Kd * deltaMeasured;
+
+
+
+        float returnConstant = 1000f;
+        //return rollError * returnConstant;
+        return pitchError / returnConstant;
     }
 
     private float angleBetweenVectors(Vector3 destination, Vector3 initial)
